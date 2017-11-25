@@ -6,7 +6,7 @@ import sys
 
 def model(x_train, y_train, x_dev, y_dev, x_test, y_test, learning_rate = 0.01, batch_size = 32, epoch_num = 100, print_cost = True):
     tf.set_random_seed(1)
-    seed = int (np.random.random() * 5)
+    seed = np.random.randint(1, 10)
     costs = []
     m, n_h, n_w, n_c = x_train.shape
     n_y = y_train.shape[1]
