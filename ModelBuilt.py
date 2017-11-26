@@ -19,9 +19,9 @@ def para_shape():
     conv4 = [3, 3, 64, 128]
     conv5 = [3, 3, 128, 256]
     #this shape need to change
-    fc1 = [4096, 1111]
-    fc2 = [4096, 4096]
-    fc3 = [30, 4096]
+    fc1 = 4096
+    fc2 = 4096
+    fc3 = 30
     paradict = {'1': conv1, 
                 '2': conv2,
                 '3': conv3,
@@ -56,10 +56,10 @@ def AlexNet_layer(X, filter = None, layer, mode = 'conv'):
         P = tf.nn.max_pool(A, ksize = [1, 2, 2, 1], strides = [1, 2, 2, 1], padding = 'SAME')
     elif mode = 'fc' and layer <= 7:
         Z = tf.contrib.layers.flatten(X)
-        A = tf.contrib.layers.fully_connected(Z, 4096, activation_fn = tf.nn.relu)
+        A = tf.contrib.layers.fully_connected(Z, filter, activation_fn = tf.nn.relu)
         P = A
     else :
-        Z = tf.contrib.layers.fully_connected(X, 30, activation_fn = tf.nn.softmax)
+        Z = tf.contrib.layers.fully_connected(X, filter, activation_fn = tf.nn.softmax)
         P = Z
 
     return  P
@@ -92,13 +92,13 @@ def forward_propagation(X, parameters):
     P5 = AlexNet_layer(P4, filter = conv5, layer = 5, mode = 'conv')
 
     #layer 6
-    A6 = AlexNet_layer(P5, filter = None, layer = 6, mode = 'fc')
+    A6 = AlexNet_layer(P5, filter = W1, layer = 6, mode = 'fc')
 
     #layer 7
-    A7 = AlexNet_layer(A6, filter = None, layer = 7, mode = 'fc')
+    A7 = AlexNet_layer(A6, filter = W2, layer = 7, mode = 'fc')
 
     #layer 8 output  30 need to change
-    y_hat = AlexNet_layer(A7, filter = None, layer = 8, mode = 'fc')
+    y_hat = AlexNet_layer(A7, filter = W3, layer = 8, mode = 'fc')
 
     return y_hat
 
@@ -107,8 +107,10 @@ def compute_cost(y_hat, y):
     return cost
 
 
-def random_batches(x, y, batch_size, seed):
-    """
-    ..............
-    """
+def random_batches(x, y, batch_size):
+    m = x.shape[0]
+    rand_batch = np.random.randint(0, m, size = batch_size)
+    batch_x =  x[(rand_batch), :, :, :]
+    batch_y = y[(rand_batch), :]
+    batches = (batch_x, batch_y)
     return batches

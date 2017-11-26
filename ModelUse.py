@@ -5,8 +5,8 @@ import matplotlib as plt
 import sys
 
 def model(x_train, y_train, x_dev, y_dev, x_test, y_test, learning_rate = 0.01, batch_size = 32, epoch_num = 100, print_cost = True):
+    #don't know if need this yet
     tf.set_random_seed(1)
-    seed = np.random.randint(1, 10)
     costs = []
     m, n_h, n_w, n_c = x_train.shape
     n_y = y_train.shape[1]
@@ -26,8 +26,7 @@ def model(x_train, y_train, x_dev, y_dev, x_test, y_test, learning_rate = 0.01, 
         for epoch in range(epoch_num):
             batch_cost = 0
             batch_num = int(m / batch_size)
-            seed = seed + 1
-            batches = random_batches(x_train, y_train, batch_size, seed)
+            batches = random_batches(x_train, y_train, batch_size)
 
             for batch in batches:
                 batch_x, batch_y = batch
