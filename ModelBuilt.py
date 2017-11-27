@@ -12,101 +12,79 @@ def create_placeholders(n_H0, n_W0, n_C0, n_y):
 
 #this function need to change
 def para_shape():
-    # 8 layers, 5 conv, 2 fc, 1 final result
-    conv1 = [12, 12, 3, 16]
-    conv2 = [8, 8, 16, 32]
-    conv3 = [4, 4, 32, 64]
-    conv4 = [3, 3, 64, 128]
-    conv5 = [3, 3, 128, 256]
+    # 7 layers, 4 conv, 2 fc, 1 final result
+    conv1 = [11, 11, 3, 96]
+    conv2 = [5, 5, 96, 256]
+    conv3 = [3, 3, 256, 256]
+    conv4 = [3, 3, 256, 256]
+
+    pool1 = [1, 3, 3, 1]
+    pool2 = [1, 3, 3, 1]
+    pool3 = [1, 3, 3, 1]
+    pool4 = [1, 3, 3, 1]
     #this shape need to change
-    fc1 = 4096
-    fc2 = 4096
-    fc3 = 30
-    paradict = {'1': conv1, 
-                '2': conv2,
-                '3': conv3,
-                '4': conv4,
-                '5': conv5,
-                '6': fc1,
-                '7', fc2,
-                '8', fc3}
+    W1 = 4096
+    W2 = 4096
+    W3 = 30
+
+    paradict = {'conv1': conv1, 
+                'conv2': conv2,
+                'conv3': conv3,
+                'conv4': conv4,
+                'pool1': pool1,
+                'pool2': pool2,
+                'pool3': pool3,
+                'pool4': pool4,
+                'W1': W1,
+                'W2': W2,
+                'W3': W3}
+
     return paradict
 
 def initialize_parameters(paradict):
     tf.set_random_seed(1)
     parameters = {}
-    layer = 8
 
-    for l in layer:
-        shape = paradict[str(l+1)]
-        var = tf.get_variable(shape = shape, initializer = tf.contrib.layers.xavier_initializer(seed = 0))
-        parameters[str(l+1)] = var
+    for name in paradict:
+        value = tf.get_variable(shape = paradict[name], initializer = tf.contrib.layers.xavier_initializer(seed = 0))
+        parameters[name] = value
 
     return parameters
 
-def LeNet_layer(X, filter = None, layer):
-    if layer <= 2:
-        Z = tf.nn.conv2d(X, filter, strides = [1, 1, 1, 1], padding = 'VALID')
-        A = tf.nn.relu(Z)
-        P = tf.nn.max_pool(A, ksize = [1, 2, 2, 1], strides = [1, 2, 2, 1], padding = 'SAME')
-    else :
-        Z = 
-
-def AlexNet_layer(X, filter = None, layer, mode = 'conv'):
-
-    if mode == 'conv' and layer <= 3:
-        Z = tf.nn.conv2d(X, filter, strides = [1, 1, 1, 1], padding = 'VALID')
-        A = tf.nn.relu(Z)
-        P = tf.nn.max_pool(A, ksize = [1, 4, 4, 1], strides = [1, 4, 4, 1], padding = 'SAME')
-    elif mode = 'conv' and layer <= 5:
-        Z = tf.nn.conv2d(X, filter, strides = [1, 1, 1, 1], padding = 'SAME')
-        A = tf.nn.relu(Z)
-        P = tf.nn.max_pool(A, ksize = [1, 2, 2, 1], strides = [1, 2, 2, 1], padding = 'SAME')
-    elif mode = 'fc' and layer <= 7:
-        Z = tf.contrib.layers.flatten(X)
-        A = tf.contrib.layers.fully_connected(Z, filter, activation_fn = tf.nn.relu)
-        P = A
-    else :
-        Z = tf.contrib.layers.fully_connected(X, filter, activation_fn = tf.nn.softmax)
-        P = Z
-
-    return  P
-
 def forward_propagation(X, parameters):
-    
     #get all the parameters
-    conv1 = parameters['conv1']
-    conv2 = parameters['conv2']
-    conv3 = parameters['conv3']
-    conv4 = parameters['conv4']
-    conv5 = parameters['conv5']
-    W1 = parameters['W1']
-    W2 = parameters['W2']
-    W3 = parameters['W3']
+    for name in parameters:
+        locals()[name] = parameters[name]
 
     #layer 1
-    P1 = AlexNet_layer(X, filter = conv1, layer = 1, mode = 'conv')
+    Z1 = tf.nn.conv2d(X, filter = conv1, strides = [1, 4, 4, 1], padding = 'VALID')
+    A1 = tf.nn.relu(Z1)
+    P1 = tf.nn.max_pool(A1, ksize = pool1, strides = [1, 2, 2, 1], padding = 'SAME')
 
     #layer 2
-    P2 = AlexNet_layer(P1, filter = conv2, layer = 2, mode = 'conv')
+    Z2 = tf.nn.conv2d(P1, filter = conv2, strides = [1, 1, 1, 1], padding = 'SAME')
+    A2 = tf.nn.relu(Z2)
+    P2 = tf.nn.max_pool(A2, ksize = pool2, strides = [1, 2, 2, 1], padding = 'SAME')
 
     #layer 3
-    P3 = AlexNet_layer(P2, filter = conv3, layer =3 , mode = 'conv')
+    Z3 = tf.nn.conv2d(P2, filter = conv3, strides = [1, 1, 1, 1], padding = 'SAME')
+    A3 = tf.nn.relu(Z3)
+    P3 = tf.nn.max_pool(A3, filter = pool3, strides = [1, 2, 2, 1], padding = 'SAME')
 
     #layer 4
-    P4 = AlexNet_layer(P3, filter = conv4, layer = 4, mode = 'conv')
-
+    Z4 = tf.nn.conv2d(P3, filter = conv4, strides = [1, 1, 1, 1], padding = 'SAME')
+    A4 = tf.nn.relu(Z4)
+    P4 = tf.nn.max_pool(A4, filter = pool4, strides = [1, 2, 2, 1], padding = 'SAME')
+    
     #layer 5
-    P5 = AlexNet_layer(P4, filter = conv5, layer = 5, mode = 'conv')
+    A5 = tf.contrib.layers.flatten(P4)
+    Z5 = tf.contrib.layers.fully_connected(A5, W1, activation_fn = tf.nn.relu)
 
     #layer 6
-    A6 = AlexNet_layer(P5, filter = W1, layer = 6, mode = 'fc')
+    Z6 = tf.contrib.layers.fully_connected(Z5, W2, activation_fn = tf.nn.relu)
 
     #layer 7
-    A7 = AlexNet_layer(A6, filter = W2, layer = 7, mode = 'fc')
-
-    #layer 8 output  30 need to change
-    y_hat = AlexNet_layer(A7, filter = W3, layer = 8, mode = 'fc')
+    y_hat = tf.contrib.layers.fully_connected(Z6, W3, activation_fn = tf.nn.softmax)
 
     return y_hat
 
@@ -116,9 +94,17 @@ def compute_cost(y_hat, y):
 
 
 def random_batches(x, y, batch_size):
+
     m = x.shape[0]
     rand_batch = np.random.randint(0, m, size = batch_size)
     batch_x =  x[(rand_batch), :, :, :]
     batch_y = y[(rand_batch), :]
     batches = (batch_x, batch_y)
     return batches
+
+def calc_accracy(x, y, parameters, name = None):
+    y_hat = forward_propagation(x, parameters)
+    prediction = tf.argmax(y_hat, 1)
+    correct_prediction = tf.equal(prediction, tf.argmax(y,1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, 'float'))
+    return accuracy

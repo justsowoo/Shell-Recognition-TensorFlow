@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib as plt 
 import sys
 
-def model(x_train, y_train, x_dev, y_dev, x_test, y_test, learning_rate = 0.01, batch_size = 32, epoch_num = 100, print_cost = True):
+def model(x_train, y_train, learning_rate = 0.01, batch_size = 32, epoch_num = 100, print_cost = True):
     #don't know if need this yet
     tf.set_random_seed(1)
     costs = []
@@ -12,8 +12,8 @@ def model(x_train, y_train, x_dev, y_dev, x_test, y_test, learning_rate = 0.01, 
     n_y = y_train.shape[1]
     
     X, Y = create_placeholders(n_h, n_w, n_c, n_y)
-    para_dict = para_shape()
-    parameters = initialize_parameters(para_dict)
+    paradict = para_shape()
+    parameters = initialize_parameters(paradict)
     y_hat = forward_propagation(X, parameters)
     cost = compute_cost(y_hat, Y)
     optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
@@ -44,3 +44,9 @@ def model(x_train, y_train, x_dev, y_dev, x_test, y_test, learning_rate = 0.01, 
         plt.title('Learning Rate = ' + str(learning_rate))
         plt.show()
 
+        
+        train_accuracy = calc_accuracy(y_hat,y_train, parameters)
+        print('Train Accuracy: %f' % train_accuracy)
+        print('Cost: %f' % costs[-1])
+
+        return train_accuracy, parameters
