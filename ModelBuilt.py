@@ -44,6 +44,14 @@ def initialize_parameters(paradict):
 
     return parameters
 
+def LeNet_layer(X, filter = None, layer):
+    if layer <= 2:
+        Z = tf.nn.conv2d(X, filter, strides = [1, 1, 1, 1], padding = 'VALID')
+        A = tf.nn.relu(Z)
+        P = tf.nn.max_pool(A, ksize = [1, 2, 2, 1], strides = [1, 2, 2, 1], padding = 'SAME')
+    else :
+        Z = 
+
 def AlexNet_layer(X, filter = None, layer, mode = 'conv'):
 
     if mode == 'conv' and layer <= 3:
