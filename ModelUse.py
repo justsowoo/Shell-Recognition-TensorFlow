@@ -1,10 +1,11 @@
-import tensorflow as tf 
 import math
-import numpy as np 
-import matplotlib as plt 
+import os
 import sys
+import matplotlib.pyplot as plt 
+import numpy as np 
+import tensorflow as tf 
 
-def model(x_train, y_train, learning_rate = 0.01, batch_size = 32, epoch_num = 100, print_cost = True):
+def model(x_train, y_train, learning_rate = 0.01, train_func = 'adam', batch_size = 64, epoch_num = 100, print_cost = True):
     #don't know if need this yet
     tf.set_random_seed(1)
     costs = []
@@ -16,16 +17,16 @@ def model(x_train, y_train, learning_rate = 0.01, batch_size = 32, epoch_num = 1
     parameters = initialize_parameters(paradict)
     y_hat = forward_propagation(X, parameters)
     cost = compute_cost(y_hat, Y)
-    optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
+    optimizer = optimize_model(learning_rate = learning_rate, cost = cost, name = train_func)
     
     init = tf.global_variables_initializer()
 
     with tf.Session() as sess:
         sess.run(init)
+        batch_num = int(m / batch_size)
 
         for epoch in range(epoch_num):
             batch_cost = 0
-            batch_num = int(m / batch_size)
             batches = random_batches(x_train, y_train, batch_size)
 
             for batch in batches:

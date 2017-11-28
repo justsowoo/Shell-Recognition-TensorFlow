@@ -1,16 +1,15 @@
-import tensorflow as tf
-import numpy as np 
-import matplotlib.pyplot as plt
 import math
+import os
 import sys
-
+import numpy as np 
+import tensorflow as tf
 
 def create_placeholders(n_H0, n_W0, n_C0, n_y):
     X = tf.placeholder(dtype = tf.float32, shape = [None, n_H0, n_W0, n_C0])
     Y = tf.placeholder(dtype = tf.float32, shape = [None, n_y])
     return X, Y
 
-#this function need to change
+#this function needs to change
 def para_shape():
     # 7 layers, 4 conv, 2 fc, 1 final result
     conv1 = [11, 11, 3, 96]
@@ -51,6 +50,7 @@ def initialize_parameters(paradict):
 
     return parameters
 
+#this func needs to change
 def forward_propagation(X, parameters):
     #get all the parameters
     for name in parameters:
@@ -79,12 +79,14 @@ def forward_propagation(X, parameters):
     #layer 5
     A5 = tf.contrib.layers.flatten(P4)
     Z5 = tf.contrib.layers.fully_connected(A5, W1, activation_fn = tf.nn.relu)
+    #Z5 = tf.contrib.layers.dropout(Z5, keep_prob = 0.8)
 
     #layer 6
-    Z6 = tf.contrib.layers.fully_connected(Z5, W2, activation_fn = tf.nn.relu)
+    A6 = tf.contrib.layers.fully_connected(Z5, W2, activation_fn = tf.nn.relu)
+    #Z6 = tf.contrib.layers.dropout(A6, keep_prob = 0.8)
 
     #layer 7
-    y_hat = tf.contrib.layers.fully_connected(Z6, W3, activation_fn = tf.nn.softmax)
+    y_hat = tf.contrib.layers.fully_connected(A6, W3, activation_fn = tf.nn.softmax)
 
     return y_hat
 
@@ -101,6 +103,23 @@ def random_batches(x, y, batch_size):
     batch_y = y[(rand_batch), :]
     batches = (batch_x, batch_y)
     return batches
+
+def optimize_model(learning_rate = 0.01, cost, name = 'adam'):
+    #   'gd'| 'ada'| 'rms'| 'momentmum'| 'adam'
+    #   default way is AdamOptimizer
+
+    if name is 'gd':
+        optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
+    elif name is 'ada':
+        optimizer = tf.train.AdagradOptimizer(learning_rate).minimize(cost)
+    elif name is 'rms':
+        optimizer = tf.train.RMSPropOptimizer(learning_rate).minimize(cost)
+    elif name is 'momentmum':
+        optimizer = tf.train.MomentumOptimizer(learning_rate).minimize(cost)
+    else:
+        optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
+    
+    return optimizer
 
 def calc_accracy(x, y, parameters, name = None):
     y_hat = forward_propagation(x, parameters)
