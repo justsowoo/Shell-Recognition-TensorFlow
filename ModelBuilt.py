@@ -104,21 +104,10 @@ def random_batches(x, y, batch_size):
     batches = (batch_x, batch_y)
     return batches
 
-def optimize_model(learning_rate = 0.01, cost, name = 'adam'):
-    #   'gd'| 'ada'| 'rms'| 'momentmum'| 'adam'
+def optimize_op(cost, learning_rate = 0.01, train_func = tf.train.AdamOptimizer):
     #   default way is AdamOptimizer
 
-    if name is 'gd':
-        optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost)
-    elif name is 'ada':
-        optimizer = tf.train.AdagradOptimizer(learning_rate).minimize(cost)
-    elif name is 'rms':
-        optimizer = tf.train.RMSPropOptimizer(learning_rate).minimize(cost)
-    elif name is 'momentmum':
-        optimizer = tf.train.MomentumOptimizer(learning_rate).minimize(cost)
-    else:
-        optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost)
-    
+    optimizer = train_func(learning_rate).minimize(cost)
     return optimizer
 
 def calc_accracy(x, y, parameters, name = None):

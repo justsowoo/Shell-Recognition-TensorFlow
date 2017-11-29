@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np 
 import tensorflow as tf 
 
-def model(x_train, y_train, learning_rate = 0.01, train_func = 'adam', batch_size = 64, epoch_num = 100, print_cost = True):
+def model(x_train, y_train, learning_rate = 0.01, train_func = tf.train.AdamOptimizer, batch_size = 64, epoch_num = 100, print_cost = True):
     #don't know if need this yet
     tf.set_random_seed(1)
     costs = []
@@ -17,7 +17,7 @@ def model(x_train, y_train, learning_rate = 0.01, train_func = 'adam', batch_siz
     parameters = initialize_parameters(paradict)
     y_hat = forward_propagation(X, parameters)
     cost = compute_cost(y_hat, Y)
-    optimizer = optimize_model(learning_rate = learning_rate, cost = cost, name = train_func)
+    optimizer = optimize_op(cost = cost, learning_rate = learning_rate, train_func = train_func)
     
     init = tf.global_variables_initializer()
 
