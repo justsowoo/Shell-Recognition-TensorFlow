@@ -24,7 +24,7 @@ def para_shape():
     #this shape need to change
     W1 = 4096
     W2 = 4096
-    W3 = 30
+    W3 = 30  #shell species we have
 
     paradict = {'conv1': conv1, 
                 'conv2': conv2,
@@ -94,7 +94,7 @@ def compute_cost(y_hat, y):
     cost = tf.nn.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits = y_hat, labels = y))
     return cost
 
-
+#this function may need to optimize after days
 def random_batches(x, y, batch_size):
 
     m = x.shape[0]
@@ -110,7 +110,7 @@ def optimize_op(cost, learning_rate = 0.01, train_func = tf.train.AdamOptimizer)
     optimizer = train_func(learning_rate).minimize(cost)
     return optimizer
 
-def calc_accracy(x, y, parameters, name = None):
+def calc_accracy(x, y, parameters):
     y_hat = forward_propagation(x, parameters)
     prediction = tf.argmax(y_hat, 1)
     correct_prediction = tf.equal(prediction, tf.argmax(y,1))
