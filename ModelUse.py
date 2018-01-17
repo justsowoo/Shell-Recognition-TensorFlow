@@ -4,7 +4,7 @@ import sys
 import matplotlib.pyplot as plt 
 import numpy as np 
 import tensorflow as tf 
-
+#x.shape == [m, n_h, n_w, n_c], y.shape == [m, n_y]
 def model(x_train, y_train, x_dev, y_dev, learning_rate = 0.01, train_func = tf.train.AdamOptimizer, batch_size = 64, epoch_num = 100, print_cost = True):
     #don't know if need this yet
     tf.set_random_seed(1)
