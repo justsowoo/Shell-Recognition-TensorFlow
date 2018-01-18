@@ -81,7 +81,8 @@ def convert_to(data_set, name):
     print('Writing', filename)
     writer = tf.python_io.TFRecordWriter(filename)
     for index in range(num_examples):
-        image_raw = images[index].tostring()
+        image_raw = cv2.imencode('.jpg', image[index])[1].tostring()
+        #image_raw = images[index].tostring()
         example = tf.train.Example(features=tf.train.Features(feature={
             'height': _int64_feature(rows),
             'width': _int64_feature(cols),
@@ -91,9 +92,33 @@ def convert_to(data_set, name):
         writer.write(example.SerializeToString())
     writer.close()
 
+def read_and_decode(filename):
+     # 创建文件队列,不限读取的数量
+    filename_queue = tf.train.string_input_producer([filename])
+    # create a reader from file queue
+    reader = tf.TFRecordReader()
+    # reader从文件队列中读入一个序列化的样本
+    _, serialized_example = reader.read(filename_queue)
+    # get feature from serialized example
+    # 解析符号化的样本
+    features = tf.parse_single_example(
+        serialized_example,
+        features={
+            'label': tf.FixedLenFeature([], tf.int64),
+            'img_raw': tf.FixedLenFeature([], tf.string)
+        }
+    )
+    label = features['label']
+    img = features['img_raw']
+    img = tf.decode_raw(img, tf.uint8)
+    img = tf.reshape(img, [256, 256, 3])
+    #img = tf.cast(img, tf.float32) * (1. / 255) - 0.5
+    label = tf.cast(label, tf.int32)
+    return img, label
+
 def main():
     data_set = img_read()
-    convert_to(data_set, name = 'train')
+    convert_to(data_set, name = 'all_pic')
 
 if __name__ == '__main__':
     main()
