@@ -24,38 +24,50 @@ def para_shape():
     #this shape need to change
     W1 = 4096
     W2 = 4096
-    W3 = 30  #shell species we have
+    W3 = 15  #shell species we have
 
-    paradict = {'conv1': conv1, 
-                'conv2': conv2,
-                'conv3': conv3,
-                'conv4': conv4,
-                'pool1': pool1,
-                'pool2': pool2,
-                'pool3': pool3,
-                'pool4': pool4,
-                'W1': W1,
-                'W2': W2,
-                'W3': W3}
+    paradict = {'conv_1': conv1, 
+                'conv_2': conv2,
+                'conv_3': conv3,
+                'conv_4': conv4,
+                'pool_1': pool1,
+                'pool_2': pool2,
+                'pool_3': pool3,
+                'pool_4': pool4,
+                'W_1': W1,
+                'W_2': W2,
+                'W_3': W3}
 
     return paradict
 
 def initialize_parameters(paradict):
-    tf.set_random_seed(1)
     parameters = {}
 
     for name in paradict:
-        value = tf.get_variable(shape = paradict[name], initializer = tf.contrib.layers.xavier_initializer(seed = 0))
-        parameters[name] = value
+        if name.split('_')[0] == 'conv':
+            value = tf.get_variable(shape = paradict[name], initializer = tf.contrib.layers.xavier_initializer(seed = 0), name = name)
+            parameters[name] = value
+        elif name.split('_')[0] == 'pool':
+            parameters[name] = paradict[name]
+        elif name.split('_')[0] == 'W':
+            parameters[name] = paradict[name]
 
     return parameters
 
 #this func needs to change
 def forward_propagation(X, parameters):
-    #get all the parameters
-    for name in parameters:
-        locals()[name] = parameters[name]
 
+    conv1 = parameters['conv_1']
+    conv2 = parameters['conv_2']
+    conv3 = parameters['conv_3']
+    conv4 = parameters['conv_4']
+    pool1 = parameters['pool_1']
+    pool2 = parameters['pool_2']
+    pool3 = parameters['pool_3']
+    pool4 = parameters['pool_4']
+    W1 = parameters['W_1']
+    W2 = parameters['W_2']
+    W3 = parameters['W_3']
     #layer 1
     Z1 = tf.nn.conv2d(X, filter = conv1, strides = [1, 4, 4, 1], padding = 'VALID')
     A1 = tf.nn.relu(Z1)
@@ -69,12 +81,12 @@ def forward_propagation(X, parameters):
     #layer 3
     Z3 = tf.nn.conv2d(P2, filter = conv3, strides = [1, 1, 1, 1], padding = 'SAME')
     A3 = tf.nn.relu(Z3)
-    P3 = tf.nn.max_pool(A3, filter = pool3, strides = [1, 2, 2, 1], padding = 'SAME')
+    P3 = tf.nn.max_pool(A3, ksize = pool3, strides = [1, 2, 2, 1], padding = 'SAME')
 
     #layer 4
     Z4 = tf.nn.conv2d(P3, filter = conv4, strides = [1, 1, 1, 1], padding = 'SAME')
     A4 = tf.nn.relu(Z4)
-    P4 = tf.nn.max_pool(A4, filter = pool4, strides = [1, 2, 2, 1], padding = 'SAME')
+    P4 = tf.nn.max_pool(A4, ksize = pool4, strides = [1, 2, 2, 1], padding = 'SAME')
     
     #layer 5
     A5 = tf.contrib.layers.flatten(P4)
@@ -91,18 +103,11 @@ def forward_propagation(X, parameters):
     return y_hat
 
 def compute_cost(y_hat, y):
-    cost = tf.nn.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits = y_hat, labels = y))
+    print('y_hat', y_hat)
+    print('y', y)
+    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits = y_hat, labels = y))
     return cost
 
-#this function may need to optimize after days
-def random_batches(x, y, batch_size):
-
-    m = x.shape[0]
-    rand_batch = np.random.randint(0, m, size = batch_size)
-    batch_x =  x[(rand_batch), :, :, :]
-    batch_y = y[(rand_batch), :]
-    batches = (batch_x, batch_y)
-    return batches
 
 def optimize_op(cost, learning_rate = 0.01, train_func = tf.train.AdamOptimizer):
     #   default way is AdamOptimizer
@@ -110,7 +115,7 @@ def optimize_op(cost, learning_rate = 0.01, train_func = tf.train.AdamOptimizer)
     optimizer = train_func(learning_rate).minimize(cost)
     return optimizer
 
-def calc_accracy(x, y, parameters):
+def calc_accuracy(x, y, parameters):
     y_hat = forward_propagation(x, parameters)
     prediction = tf.argmax(y_hat, 1)
     correct_prediction = tf.equal(prediction, tf.argmax(y,1))
